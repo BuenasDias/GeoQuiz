@@ -34,10 +34,6 @@ class MainActivity : AppCompatActivity() {
         toast.show()
     }
 
-    private fun toast(message: String){
-        val toast = Toast.makeText(this, message, Toast.LENGTH_SHORT)
-        toast.setGravity(Gravity.TOP, 0, 200)
-        toast.show()
-    }
+
 
 }
