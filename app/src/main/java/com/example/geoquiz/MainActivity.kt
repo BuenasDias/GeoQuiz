@@ -30,11 +30,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.trueButton1.setOnClickListener {
-            toast(R.string.correct_toast)
+            checkAnswer(true)
         }
 
         binding.falseButton1.setOnClickListener {
-            toast(R.string.incorrect_toast)
+            checkAnswer(false)
         }
 
         binding.nextButton.setOnClickListener {
@@ -45,24 +45,31 @@ class MainActivity : AppCompatActivity() {
         }
 
         updateQuestion()
-
     }
 
-    fun updateQuestion(){
+    private fun updateQuestion() {
         val questionTextResId = questionBank[currentIndex].textResId
         binding.questionTextView.setText(questionTextResId)
     }
 
-    private fun toast(message: Int){
+    private fun toast(message: Int) {
         val toast = Toast.makeText(this, message, Toast.LENGTH_SHORT)
         toast.setGravity(Gravity.TOP, 0, 200)
         toast.show()
     }
 
-    private fun toast(message: String){
+    private fun toast(message: String) {
         val toast = Toast.makeText(this, message, Toast.LENGTH_SHORT)
         toast.setGravity(Gravity.TOP, 0, 200)
         toast.show()
+    }
 
+    private fun checkAnswer(userAnswer: Boolean) {
+        val correctAnswer = questionBank[currentIndex].answer
+
+        val messageResId = if (userAnswer == correctAnswer) R.string.correct_toast
+        else R.string.incorrect_toast
+
+        toast(messageResId)
     }
 }
