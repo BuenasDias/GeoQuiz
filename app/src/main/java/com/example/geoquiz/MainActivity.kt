@@ -2,32 +2,27 @@ package com.example.geoquiz
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Message
 import android.util.Log
 import android.view.Gravity
 import android.widget.Toast
+import androidx.activity.viewModels
 import com.example.geoquiz.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-    private val TAG: String = "TAG"
     private lateinit var binding: ActivityMainBinding
+    private val quizViewModel: QuizViewModel by viewModels()
 
-    private val questionBank = listOf(
-        Question(R.string.question_australia, true),
-        Question(R.string.question_oceans, true),
-        Question(R.string.question_mideast, false),
-        Question(R.string.question_africa, false),
-        Question(R.string.question_americas, true),
-        Question(R.string.question_asia, true),
-    )
-
-    private var currentIndex = 0
+    private val TAG = "MainActivity"
+    private val KEY_INDEX = "index"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val currentIndex = savedInstanceState?.getInt(KEY_INDEX, 0) ?: 0
+        quizViewModel.currentIndex = currentIndex
 
         binding.trueButton1.setOnClickListener {
             checkAnswer(true)
@@ -38,17 +33,31 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.nextButton.setOnClickListener {
-            currentIndex = (currentIndex + 1) % questionBank.size
-            val questionTextIdRes = questionBank[currentIndex].textResId
-            binding.questionTextView.setText(questionTextIdRes)
+            quizViewModel.moveToNext()
+            updateQuestion()
+        }
+
+        binding.prevButton.setOnClickListener {
+            quizViewModel.moveToPrev()
+            updateQuestion()
+        }
+
+        binding.questionTextView.setOnClickListener {
+            quizViewModel.moveToNext()
             updateQuestion()
         }
 
         updateQuestion()
     }
 
+    override fun onSaveInstanceState(savedInstanceState: Bundle) {
+        super.onSaveInstanceState(savedInstanceState)
+        Log.i(TAG, "onSaveInstanceState")
+        savedInstanceState.putInt(KEY_INDEX, quizViewModel.currentIndex)
+    }
+
     private fun updateQuestion() {
-        val questionTextResId = questionBank[currentIndex].textResId
+        val questionTextResId = quizViewModel.currentQuestionText
         binding.questionTextView.setText(questionTextResId)
     }
 
@@ -65,10 +74,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkAnswer(userAnswer: Boolean) {
-        val correctAnswer = questionBank[currentIndex].answer
+        val correctAnswer = quizViewModel.currentQuestionAnswer
 
-        val messageResId = if (userAnswer == correctAnswer) R.string.correct_toast
-        else R.string.incorrect_toast
+        val messageResId =
+            if (userAnswer == correctAnswer) R.string.correct_toast
+            else R.string.incorrect_toast
 
         toast(messageResId)
     }
